@@ -1,4 +1,5 @@
 using API.Data;
+using API.Middleware;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +17,12 @@ builder.Services.AddDbContext<StoreContext>(opt =>
 });
 
 builder.Services.AddCors();
+// Since we are injecting ExceptionMiddleware in the ExceptionMiddleware class we defined, we have to define it as a service
+builder.Services.AddTransient<ExceptionMiddleware>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>(); // Must be at the top of the middlewares. This is what catches the exceptions so it has to be the last middleware in the middlewares stack
 
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())

@@ -3,6 +3,7 @@ import { counterSlice } from "../../features/contact/counterReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { catalogApi } from "../../features/catalog/catalogApi";
 import { uiSlice } from "../layout/uiSlice";
+import { errorApi } from "../../features/about/errorApi";
 
 // LEGACY
 // export function configureTheStore() {
@@ -12,12 +13,14 @@ import { uiSlice } from "../layout/uiSlice";
 export const store = configureStore({
   reducer: {
     [catalogApi.reducerPath]: catalogApi.reducer, // For every slice we create using the redux toolkit query we need to define a middleware
+    [errorApi.reducerPath]: errorApi.reducer,
     counter: counterSlice.reducer,
     ui: uiSlice.reducer,
   },
   middleware: (
     getDefaultMiddleware, // No need to implement the getDefaultMiddleware function. It is provided by the Redux Toolkit Query. Here we are adding the defsault middleware, our own catalogApi middleware. We are configuring this to be used by our Redux store. We need this middleware to handle the API request, intercept, dispatch, actions (related to queries), initiates the fetching process. Also, helps with caching and cache validation. And oalso helps to catch and handle errors
-  ) => getDefaultMiddleware().concat(catalogApi.middleware),
+  ) =>
+    getDefaultMiddleware().concat(catalogApi.middleware, errorApi.middleware),
 });
 
 // Infer the `RootState`, `AppDispatch`, and `AppStore` types from the store itself

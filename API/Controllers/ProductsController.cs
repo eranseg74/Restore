@@ -1,15 +1,12 @@
 using API.Data;
 using API.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     // Dependency Injection - When a new instance of the ProductsController is created which happens when it recieves an http request, it instanciate a new instance of the StoreContext. If the StoreContext would not have been defined as a service this would not work because we can only inject services
-    public class ProductsController(StoreContext context) : ControllerBase
+    public class ProductsController(StoreContext context) : BaseApiController
     {
         [HttpGet]
         // Using async tasks to query db is the best practice and should always implemented that way

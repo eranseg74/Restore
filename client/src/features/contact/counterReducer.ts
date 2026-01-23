@@ -23,6 +23,7 @@ export const counterSlice = createSlice({
 
 export const { increment, decrement } = counterSlice.actions;
 
+// LEGACY
 export function incrementLegacy(amount = 1) {
   return { type: "increment", payload: amount };
 }
@@ -36,9 +37,9 @@ export default function counterReducer(
   action: { type: string; payload: number },
 ) {
   switch (action.type) {
-    case "increment":
+    case "incrementLegacy":
       return { ...state, data: state.data + action.payload };
-    case "decrement":
+    case "decrementLegacy":
       return { ...state, data: state.data - action.payload };
     default:
       return state;
