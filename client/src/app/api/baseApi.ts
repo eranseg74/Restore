@@ -19,7 +19,7 @@ const sleep = () => new Promise((resolve) => setTimeout(resolve, 1000));
 
 export const baseQueryWithErrorHandling = async (
   args: string | FetchArgs,
-  api: BaseQueryApi, // The api gives us access to Redux (th the store) where we can get the status and dispatch actions
+  api: BaseQueryApi, // The api gives us access to Redux (to the store) where we can get the status and dispatch actions
   extraOptions: object,
 ) => {
   api.dispatch(startLoading());

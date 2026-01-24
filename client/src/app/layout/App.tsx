@@ -6,7 +6,7 @@ import {
   ThemeProvider,
 } from "@mui/material";
 import NavBar from "./NavBar";
-import { Outlet } from "react-router-dom";
+import { Outlet, ScrollRestoration } from "react-router-dom";
 import { useAppSelector } from "../store/store";
 
 function App() {
@@ -25,6 +25,8 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      {/* The ScrollRestoration will make sure we are always on the top of the page when routing between pages */}
+      <ScrollRestoration />
       <CssBaseline />
       <NavBar />
       <Box

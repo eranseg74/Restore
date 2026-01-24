@@ -1,5 +1,7 @@
 using API.Data;
 using API.Entities;
+using API.Extensions;
+using API.RequestHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +13,21 @@ namespace API.Controllers
         [HttpGet]
         // Using async tasks to query db is the best practice and should always implemented that way
         // Task - When we define async endpoint we need to delegate it into a task which goes and query the DB. In the meantime the main thread continues and does not wait for the Task to complete. Once the Task is complete and the data is fetched the data returns to the main thread and the Task is finished
-        public async Task<ActionResult<List<Product>>> GetProducts()
+        public async Task<ActionResult<List<Product>>> GetProducts([FromQuery] ProductParams productParams) // The name orderBy must match the key in the query string
         {
-            return await context.Products.ToListAsync();
+            // The idea is to build a query tree and place it in the query variable which is of type IQueryable. When the tree is ready only then we will query the DB using the ToListAsync function.
+            // deffering the execution of the request. See the implementation in the ProductExtensions.cs file
+            var query = context.Products.Sort(productParams.OrderBy).Search(productParams.SearchTerm).Filter(productParams.Brands, productParams.Types).AsQueryable(); // Note that the order in the filter is important
+
+            var products = await PagedList<Product>.ToPagedList(query, productParams.PageNumber, productParams.PageSize);
+
+            Response.AddPaginationHeader(products.Metatdata); // Adding the pagination metadata to the header using the HttpExtension we created
+
+            // context.Products is also a query so it is Ok to write context.Products.ToListAsync. Since we want to add sorting / filtering / pagination we use this way
+            // return await query.ToListAsync(); // No need to run this because we already fetching the desired data with the pagination properties from the ToPagedList function we implemented
+            //return Ok(new { Items = products, products.Metatdata }); // Items is just the key which holds the products. We also add in the returned object the metadata
+            // Since we added the pagination metadata to the header we can just return the products
+            return products;
         }
 
         [HttpGet("{id}")]
@@ -25,6 +39,14 @@ namespace API.Controllers
                 return NotFound();
             }
             return product;
+        }
+
+        [HttpGet("filters")]
+        public async Task<IActionResult> GetFilters()
+        {
+            var brands = await context.Products.Select(x => x.Brand).Distinct().ToListAsync();
+            var types = await context.Products.Select(x => x.Type).Distinct().ToListAsync();
+            return Ok(new { brands, types });
         }
     }
 }

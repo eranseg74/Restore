@@ -5,6 +5,7 @@ import { catalogApi } from "../../features/catalog/catalogApi";
 import { uiSlice } from "../layout/uiSlice";
 import { errorApi } from "../../features/about/errorApi";
 import { basketApi } from "../../features/basket/basketApi";
+import { catalogSlice } from "../../features/catalog/catalogSlice";
 
 // LEGACY
 // export function configureTheStore() {
@@ -18,6 +19,7 @@ export const store = configureStore({
     [basketApi.reducerPath]: basketApi.reducer,
     counter: counterSlice.reducer,
     ui: uiSlice.reducer,
+    catalog: catalogSlice.reducer,
   },
   middleware: (
     getDefaultMiddleware, // No need to implement the getDefaultMiddleware function. It is provided by the Redux Toolkit Query. Here we are adding the defsault middleware, our own catalogApi middleware. We are configuring this to be used by our Redux store. We need this middleware to handle the API request, intercept, dispatch, actions (related to queries), initiates the fetching process. Also, helps with caching and cache validation. And oalso helps to catch and handle errors
