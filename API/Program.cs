@@ -36,7 +36,8 @@ app.UseMiddleware<ExceptionMiddleware>(); // Must be at the top of the middlewar
 
 app.UseCors(opt =>
 {
-  opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:3000");
+  // AllowCredentials will allow the browser to send cookies to the server
+  opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("https://localhost:3000");
 });
 
 app.MapControllers();

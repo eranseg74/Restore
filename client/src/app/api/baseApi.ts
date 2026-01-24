@@ -9,6 +9,7 @@ import { router } from "../routes/Routes";
 
 const customBaseQuery = fetchBaseQuery({
   baseUrl: "https://localhost:5001/api",
+  credentials: "include", // This means that any request will be attached with the cookie
 });
 
 // Handling the various error types:
@@ -42,11 +43,19 @@ export const baseQueryWithErrorHandling = async (
         }
         break;
       case 401:
-        if (typeof responseData === "object" && "title" in responseData)
+        if (
+          typeof responseData === "object" &&
+          responseData !== null &&
+          "title" in responseData
+        )
           toast.error(responseData.title);
         break;
       case 404:
-        if (typeof responseData === "object" && "title" in responseData)
+        if (
+          typeof responseData === "object" &&
+          responseData !== null &&
+          "title" in responseData
+        )
           router.navigate("/not-found");
         break;
       case 500:

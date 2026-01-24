@@ -13,5 +13,7 @@ namespace API.Data
         // Depending on the database being used, some parts of a LINQ query against a DbSet<TEntity> may be evaluated in memory rather than being translated into a database query.
         // DbSet<TEntity> objects are usually obtained from a DbSet<TEntity> property on a derived DbContext or from the DbContext.Set<TEntity>() method.
         public DbSet<Product> Products { get; set; }
+        public DbSet<Basket> Baskets { get; set; }
+        // No need to create another DbSet for the BasketItem. When the DbSet for the Baskets is created it will see the following prop -> public List<BasketItem> Items { get; set; } = []; and because of that will create another DbSet for the BasketItems with one-to-many relationship. In addition, becuase of the navigation properties we defined in the BasketItem it will create the relationship between the Product and the BasketItem (public required Product Product { get; set; })
     }
 }
