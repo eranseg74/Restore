@@ -6,6 +6,7 @@ import { uiSlice } from "../layout/uiSlice";
 import { errorApi } from "../../features/about/errorApi";
 import { basketApi } from "../../features/basket/basketApi";
 import { catalogSlice } from "../../features/catalog/catalogSlice";
+import { accountApi } from "../../features/account/accountApi";
 
 // LEGACY
 // export function configureTheStore() {
@@ -17,6 +18,7 @@ export const store = configureStore({
     [catalogApi.reducerPath]: catalogApi.reducer, // For every slice we create using the redux toolkit query we need to define a middleware
     [errorApi.reducerPath]: errorApi.reducer,
     [basketApi.reducerPath]: basketApi.reducer,
+    [accountApi.reducerPath]: accountApi.reducer,
     counter: counterSlice.reducer,
     ui: uiSlice.reducer,
     catalog: catalogSlice.reducer,
@@ -28,6 +30,7 @@ export const store = configureStore({
       catalogApi.middleware,
       errorApi.middleware,
       basketApi.middleware,
+      accountApi.middleware,
     ),
 });
 

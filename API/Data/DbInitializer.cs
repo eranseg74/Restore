@@ -1,4 +1,5 @@
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
@@ -6,18 +7,34 @@ namespace API.Data
     public class DbInitializer
     {
         // We need acess to the app defined in the Program.cs so we pass it to this function
-        public static void InitDb(WebApplication app)
+        public static async Task InitDb(WebApplication app)
         {
             // using - Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
             // Basically we are saying here that everything we do inside the scope is going to be disposed of by the framework after we finish using it. No need to manually clean it. This will happen by the ef framework but by defining 'using' we make sure of that
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<StoreContext>() ?? throw new InvalidOperationException("Failed to retrieve store context"); // This will give us access to our stroe context
-            SeedDate(context);
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>() ?? throw new InvalidOperationException("Failed to retrieve user manager"); // This will give us access to our user manager
+            await SeedDate(context, userManager);
         }
 
-        private static void SeedDate(StoreContext context)
+        private static async Task SeedDate(StoreContext context, UserManager<User> userManager)
         {
             context.Database.Migrate();
+
+            // Seeding users in case there are no users
+            if (!userManager.Users.Any()) // The UserManager class provides the APIs for managing users in a persistence store. It gives asscess to the Users property that represents all the users in the persistence store along with access to the entire storecontext
+            {
+                var users = new List<User>
+                {
+                    new() { UserName = "bob@test.com", Email = "bob@test.com" },
+                    new() { UserName = "admin@test.com", Email = "admin@test.com" }
+                };
+
+                await userManager.CreateAsync(users[0], "Pa$$w0rd");
+                await userManager.AddToRoleAsync(users[0], "Member");
+                await userManager.CreateAsync(users[1], "Pa$$w0rd");
+                await userManager.AddToRolesAsync(users[1], ["Member", "Admin"]);
+            }
 
             if (context.Products.Any())
             {
