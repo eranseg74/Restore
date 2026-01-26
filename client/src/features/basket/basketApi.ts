@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithErrorHandling } from "../../app/api/baseApi";
 import { type Item, type Basket } from "../../app/models/basket";
 import type { Product } from "../../app/models/product";
+import Cookies from "js-cookie";
 
 // When we try to add an item to the basket we can do this from the catalog page that contains a list of products, or from the basket that contains a list of basket items. Since these are two different objects (Product - defined in the product.ts, or Item - defined in the basket.ts). Therefore we need to implement a type guard that will tell us what is the correct object we are working with so we will know to pass the correct parameters:
 function isBasketItem(product: Product | Item): product is Item {
@@ -108,6 +109,17 @@ export const basketApi = createApi({
         }
       },
     }),
+    clearBasket: builder.mutation<void, void>({
+      queryFn: () => ({ data: undefined }), // We do not want to do anything with this query, just execute it
+      onQueryStarted: async (_NEVER, { dispatch }) => {
+        dispatch(
+          basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
+            draft.items = []; // This will delete all the items from our basket in the Redux store
+          }),
+        );
+        Cookies.remove("basketId");
+      },
+    }),
   }),
 });
 
@@ -115,4 +127,5 @@ export const {
   useFetchBasketQuery,
   useAddBasketItemMutation,
   useRemoveBasketItemMutation,
+  useClearBasketMutation,
 } = basketApi;

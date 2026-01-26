@@ -1,6 +1,7 @@
 using API.Data;
 using API.Entities;
 using API.Middleware;
+using API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,8 @@ builder.Services.AddDbContext<StoreContext>(opt =>
 builder.Services.AddCors();
 // Since we are injecting ExceptionMiddleware in the ExceptionMiddleware class we defined, we have to define it as a service
 builder.Services.AddTransient<ExceptionMiddleware>();
+
+builder.Services.AddScoped<PaymentsService>();
 
 // Integrating Identity Framework to the app
 // Adding this service provides the tables and endpoints we need to mnaage the users and roles in our app

@@ -1,6 +1,8 @@
 export type Basket = {
   basketId: string;
   items: Item[];
+  clientSecret?: string;
+  paymentIntentId?: string;
 };
 
 export type Item = {
