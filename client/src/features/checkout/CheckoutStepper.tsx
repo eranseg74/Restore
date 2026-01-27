@@ -31,6 +31,7 @@ import { useBasket } from "../../app/lib/hooks/useBasket";
 import { currencyFormat } from "../../app/lib/util";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useCreateOrderMutation } from "../orders/orderApi";
 
 const steps = ["Address", "Payment", "Review"];
 
@@ -39,6 +40,7 @@ export default function CheckoutStepper() {
   const navigate = useNavigate();
   const { basket, clearBasket } = useBasket();
   const [activeStep, setActiveStep] = useState(0);
+  const [createOrder] = useCreateOrderMutation();
   // The address data contains the name and few other properties in a single object. If we want to separate the name from the rest of the properties we can use this technic which sets the data as an object that contains a name property and the rest of the properties in another object:
   const { data: { name, ...restAddress } = {} as Address, isLoading } =
     useFetchAddressQuery();
@@ -72,6 +74,11 @@ export default function CheckoutStepper() {
       if (!confirmationToken || !basket?.clientSecret) {
         throw new Error("Unable to process payment");
       }
+
+      // Creating the order before confirming the payment with Stripe so the order will be in a pending state in the Backend. When the payment is confirmed, Stripe will notify the server on a successful payment and the order will be complete
+      const orderModel = await createOrderModel();
+      const orderResult = await createOrder(orderModel);
+
       // Use stripe.confirmPayment to confirm a PaymentIntent using data collected by the Payment Element. When called, stripe.confirmPayment will attempt to complete any required actions, such as authenticating your user by displaying a 3DS dialog or redirecting them to a bank authorization page. Your user will be redirected to the return_url you pass once the confirmation is complete.
       // By default, stripe.confirmPayment will always redirect to your return_url after a successful confirmation. If you set redirect: "if_required", then stripe.confirmPayment will only redirect if your user chooses a redirect-based payment method. Setting if_required requires that you handle successful confirmations for redirect-based and non-redirect based payment methods separately
       const paymentResult = await stripe?.confirmPayment({
@@ -82,7 +89,7 @@ export default function CheckoutStepper() {
         },
       });
       if (paymentResult?.paymentIntent?.status === "succeeded") {
-        navigate("/checkout/success");
+        navigate("/checkout/success", { state: orderResult }); // Passing the orderResult as state to the success page. The state: {state: orderResult} is an object that contains the orderResult from the createOrder mutation which mutates the order in the backend and returns the order data so we can access it in the success page
         clearBasket();
       } else if (paymentResult?.error) {
         throw new Error(paymentResult.error.message);
@@ -97,6 +104,16 @@ export default function CheckoutStepper() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Helper function to organize the payment summary and the shipping address for creating a new order
+  const createOrderModel = async () => {
+    const shippingAddress = await getStripeAddress();
+    const paymentSummary = confirmationToken?.payment_method_preview.card;
+    if (!shippingAddress || !paymentSummary) {
+      throw new Error("Problem creating order");
+    }
+    return { shippingAddress, paymentSummary };
   };
 
   const handleAddressChange = (event: StripeAddressElementChangeEvent) => {

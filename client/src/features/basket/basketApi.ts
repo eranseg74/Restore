@@ -115,6 +115,7 @@ export const basketApi = createApi({
         dispatch(
           basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
             draft.items = []; // This will delete all the items from our basket in the Redux store
+            draft.basketId = ""; // Clearing the basketId in the server so we will create a new basket next time an item is added to the basket
           }),
         );
         Cookies.remove("basketId");

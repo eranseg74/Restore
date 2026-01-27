@@ -10,6 +10,7 @@
     <Folder Include="Data/" />
     <Folder Include="DTOs/" />
     <Folder Include="Entities/" />
+    <Folder Include="Entities/OrderAggregate/" />
     <Folder Include="Extensions/" />
     <Folder Include="Middleware/" />
     <Folder Include="RequestHelpers/" />
@@ -19,7 +20,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
-    <PackageReference Include="Stripe.net" Version="50.3.0-alpha.1" />
+    <PackageReference Include="Stripe.net" Version="50.2.0" />
   </ItemGroup>
 
   <!-- <ItemGroup>

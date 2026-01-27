@@ -8,6 +8,7 @@ import { basketApi } from "../../features/basket/basketApi";
 import { catalogSlice } from "../../features/catalog/catalogSlice";
 import { accountApi } from "../../features/account/accountApi";
 import { checkoutApi } from "../../features/checkout/checkoutApi";
+import { orderApi } from "../../features/orders/orderApi";
 
 // LEGACY
 // export function configureTheStore() {
@@ -16,17 +17,21 @@ import { checkoutApi } from "../../features/checkout/checkoutApi";
 
 export const store = configureStore({
   reducer: {
+    // Here we are defining all the slices of state that our Redux store will manage. Each slice corresponds to a specific feature or domain of our application.
+    // The reducerPath is a unique key that identifies the slice of state managed by each API service created using Redux Toolkit Query.
+    // For example - [catalogApi.reducerPath]: catalogApi.reducer means that we are using the reducer provided by the catalogApi service to manage the state related to catalog data.
     [catalogApi.reducerPath]: catalogApi.reducer, // For every slice we create using the redux toolkit query we need to define a middleware
     [errorApi.reducerPath]: errorApi.reducer,
     [basketApi.reducerPath]: basketApi.reducer,
     [accountApi.reducerPath]: accountApi.reducer,
     [checkoutApi.reducerPath]: checkoutApi.reducer,
+    [orderApi.reducerPath]: orderApi.reducer,
     counter: counterSlice.reducer,
     ui: uiSlice.reducer,
     catalog: catalogSlice.reducer,
   },
   middleware: (
-    getDefaultMiddleware, // No need to implement the getDefaultMiddleware function. It is provided by the Redux Toolkit Query. Here we are adding the defsault middleware, our own catalogApi middleware. We are configuring this to be used by our Redux store. We need this middleware to handle the API request, intercept, dispatch, actions (related to queries), initiates the fetching process. Also, helps with caching and cache validation. And oalso helps to catch and handle errors
+    getDefaultMiddleware, // No need to implement the getDefaultMiddleware function. It is provided by the Redux Toolkit Query. Here we are adding the defsault middleware, our own catalogApi middleware. We are configuring this to be used by our Redux store. We need this middleware to handle the API request, intercept, dispatch, actions (related to queries), initiates the fetching process. Also, helps with caching and cache validation. And also helps to catch and handle errors
   ) =>
     getDefaultMiddleware().concat(
       catalogApi.middleware,
@@ -34,6 +39,7 @@ export const store = configureStore({
       basketApi.middleware,
       accountApi.middleware,
       checkoutApi.middleware,
+      orderApi.middleware,
     ),
 });
 
