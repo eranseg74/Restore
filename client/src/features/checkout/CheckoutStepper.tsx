@@ -21,7 +21,7 @@ import {
   useFetchAddressQuery,
   useUpdateUserAddressMutation,
 } from "../account/accountApi";
-import type { Address } from "../../app/models/user";
+//import type { Address } from "../../app/models/user";
 import type {
   ConfirmationToken,
   StripeAddressElementChangeEvent,
@@ -42,8 +42,16 @@ export default function CheckoutStepper() {
   const [activeStep, setActiveStep] = useState(0);
   const [createOrder] = useCreateOrderMutation();
   // The address data contains the name and few other properties in a single object. If we want to separate the name from the rest of the properties we can use this technic which sets the data as an object that contains a name property and the rest of the properties in another object:
-  const { data: { name, ...restAddress } = {} as Address, isLoading } =
-    useFetchAddressQuery();
+  // const { data: { name, ...restAddress } = {} as Address, isLoading } =
+  //   useFetchAddressQuery();
+  const { data, isLoading } = useFetchAddressQuery();
+
+  let name, restAddress;
+  if (data) {
+    ({ name, ...restAddress } = data);
+  }
+
+  console.log(name, restAddress);
   const [updateAddress] = useUpdateUserAddressMutation();
   const [saveAddressChecked, setSaveAddressChecked] = useState(false);
   const [addressComplete, setAddressComplete] = useState(false);
