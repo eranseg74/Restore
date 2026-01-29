@@ -1,12 +1,15 @@
 using API.Data;
 using API.Entities;
 using API.Middleware;
+using API.RequestHelpers;
 using API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuring CloudinarySettings to be used via IOptions<CloudinarySettings>. This will bind the Cloudinary section in appsettings.json to the CloudinarySettings class
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -21,10 +24,14 @@ builder.Services.AddDbContext<StoreContext>(opt =>
 });
 
 builder.Services.AddCors();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 // Since we are injecting ExceptionMiddleware in the ExceptionMiddleware class we defined, we have to define it as a service
 builder.Services.AddTransient<ExceptionMiddleware>();
 
 builder.Services.AddScoped<PaymentsService>();
+builder.Services.AddScoped<ImageService>();
 
 // Integrating Identity Framework to the app
 // Adding this service provides the tables and endpoints we need to mnaage the users and roles in our app

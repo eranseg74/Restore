@@ -11,6 +11,7 @@ export const catalogApi = createApi({
   // Instead of defining a base query for every API file we create we defined a baseApi file where we defined a base query with error handling. This way, if we need to change the base url we will do it in a single file
   // baseQuery: fetchBaseQuery({ baseUrl: "https://localhost:5001/api" }),
   baseQuery: baseQueryWithErrorHandling,
+  tagTypes: ["Products"],
   endpoints: (builder) => ({
     fetchProducts: builder.query<
       { items: Product[]; pagination: Pagination },

@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import type { User } from "../models/user";
-import { History, Logout, Person } from "@mui/icons-material";
+import { History, Inventory, Logout, Person } from "@mui/icons-material";
 import { useLogoutMutation } from "../../features/account/accountApi";
 import { Link } from "react-router-dom";
 
@@ -60,6 +60,14 @@ export default function UserMenu({ user }: Props) {
           </ListItemIcon>
           <ListItemText>My orders</ListItemText>
         </MenuItem>
+        {user.roles.includes("Admin") && (
+          <MenuItem component={Link} to='/inventory'>
+            <ListItemIcon>
+              <Inventory />
+            </ListItemIcon>
+            <ListItemText>Inventory</ListItemText>
+          </MenuItem>
+        )}
         <Divider />
         <MenuItem onClick={() => logout()}>
           <ListItemIcon>

@@ -1,14 +1,18 @@
 using API.Data;
+using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
+using API.Services;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
     // Dependency Injection - When a new instance of the ProductsController is created which happens when it recieves an http request, it instanciate a new instance of the StoreContext. If the StoreContext would not have been defined as a service this would not work because we can only inject services
-    public class ProductsController(StoreContext context) : BaseApiController
+    public class ProductsController(StoreContext context, IMapper mapper, ImageService imageService) : BaseApiController
     {
         [HttpGet]
         // Using async tasks to query db is the best practice and should always implemented that way
@@ -47,6 +51,92 @@ namespace API.Controllers
             var brands = await context.Products.Select(x => x.Brand).Distinct().ToListAsync();
             var types = await context.Products.Select(x => x.Type).Distinct().ToListAsync();
             return Ok(new { brands, types });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult<Product>> CreateProduct(CreateProductDto productDto)
+        {
+            // Using the AutoMapper to map between entities and DTOs. If the name and the type of a propery matches between the objects, AutoMapper will map it automatically saving a lot of boilerplate code. Here we are mapping from productDto to a Product structure and assigning it to product in order to create a new product in our application
+            var product = mapper.Map<Product>(productDto); // Mapping the givrn dto to a new Product
+
+            if (productDto.File != null)
+            {
+                var imageResult = await imageService.AddImageAsync(productDto.File);
+                if (imageResult.Error != null)
+                {
+                    return BadRequest(imageResult.Error.Message);
+                }
+                product.PictureUrl = imageResult.SecureUrl.AbsoluteUri; // The URL stored in Cloudinary
+                product.PublicId = imageResult.PublicId;
+            }
+            context.Products.Add(product);
+
+            var result = await context.SaveChangesAsync() > 0;
+            if (result)
+            {
+                return CreatedAtAction(nameof(GetProduct), new { Id = product.Id }, product);
+            }
+            return BadRequest("Problem creating new product");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        public async Task<ActionResult> UpdateProduct(UpdateProductDto productDto)
+        {
+            var product = await context.Products.FindAsync(productDto.Id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            // After finding the product in the DB, in this stage the product is tracked by entityframework. This way, when we map from the productDto to the product from the DB, all the changed fields will be saved to the DB on SaveChangeAsync
+            mapper.Map(productDto, product);
+
+            if (productDto.File != null)
+            {
+                var imageResult = await imageService.AddImageAsync(productDto.File);
+                if (imageResult.Error != null)
+                {
+                    return BadRequest(imageResult.Error.Message);
+                }
+                if (!string.IsNullOrEmpty(product.PublicId))
+                {
+                    await imageService.DeleteImageAsync(product.PublicId);
+                }
+                product.PictureUrl = imageResult.SecureUrl.AbsoluteUri; // The URL stored in Cloudinary
+                product.PublicId = imageResult.PublicId;
+            }
+
+            var result = await context.SaveChangesAsync() > 0;
+            if (result)
+            {
+                return NoContent();
+            }
+            return BadRequest("Problem updating the product");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> DeleteProduct(int id)
+        {
+            var product = await context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            if (!string.IsNullOrEmpty(product.PublicId))
+            {
+                await imageService.DeleteImageAsync(product.PublicId);
+            }
+            product.PictureUrl = "";
+            product.PublicId = "";
+            context.Products.Remove(product);
+            var result = await context.SaveChangesAsync() > 0;
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest("Problem deleting the product");
         }
     }
 }
