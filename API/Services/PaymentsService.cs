@@ -4,9 +4,9 @@ using Stripe.V2;
 
 namespace API.Services
 {
-    public class PaymentsService(IConfiguration config)
+    public class PaymentsService(IConfiguration config, DiscountService discountService)
     {
-        public async Task<PaymentIntent> CreateOrUpdatePaymentIntent(Basket basket)
+        public async Task<PaymentIntent> CreateOrUpdatePaymentIntent(Basket basket, bool removeDiscount = false)
         {
             StripeConfiguration.ApiKey = config["StripeSettings:SecretKey"];
             var service = new PaymentIntentService();
@@ -14,13 +14,18 @@ namespace API.Services
 
             var subtotal = basket.Items.Sum(x => x.Quantity * x.Product.Price);
             var deliveryFee = subtotal > 10000 ? 0 : 500;
-
+            long discount = 0;
+            if (basket.Coupon != null)
+            {
+                discount = await discountService.CalculateDiscountFromAmount(basket.Coupon, subtotal, removeDiscount);
+            }
+            var totalAmount = subtotal - discount + deliveryFee;
             if (string.IsNullOrEmpty(basket.PaymentIntentId))
             {
                 // In case there is no payment intent - create a new one using these options
                 var options = new PaymentIntentCreateOptions
                 {
-                    Amount = subtotal + deliveryFee,
+                    Amount = totalAmount,
                     Currency = "usd",
                     PaymentMethodTypes = ["card"]
                 };
@@ -31,7 +36,7 @@ namespace API.Services
                 // In case there is a payment intent - update it. The currency and payment method already specified in the create intent so we can update them only if required
                 var options = new PaymentIntentUpdateOptions
                 {
-                    Amount = subtotal + deliveryFee
+                    Amount = totalAmount
                 };
                 await service.UpdateAsync(basket.PaymentIntentId, options);
             }

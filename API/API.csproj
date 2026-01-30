@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Data/" />
     <Folder Include="DTOs/" />
-    <Folder Include="Entities/" />
     <Folder Include="Entities/OrderAggregate/" />
     <Folder Include="Extensions/" />
     <Folder Include="Middleware/" />

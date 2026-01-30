@@ -3,6 +3,7 @@ export type Basket = {
   items: Item[];
   clientSecret?: string;
   paymentIntentId?: string;
+  coupon: Coupon | null;
 };
 
 export type Item = {
@@ -13,6 +14,14 @@ export type Item = {
   brand: string;
   type: string;
   quantity: number;
+};
+
+export type Coupon = {
+  couponId: string;
+  name: string;
+  amountOff?: number;
+  percentOff?: number;
+  promotionCode: string;
 };
 /*
 export class Item {

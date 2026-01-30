@@ -51,7 +51,6 @@ export default function CheckoutStepper() {
     ({ name, ...restAddress } = data);
   }
 
-  console.log(name, restAddress);
   const [updateAddress] = useUpdateUserAddressMutation();
   const [saveAddressChecked, setSaveAddressChecked] = useState(false);
   const [addressComplete, setAddressComplete] = useState(false);

@@ -12,7 +12,7 @@ namespace API.Extensions
             {
                 BasketId = basket.BasketId,
                 ClientSecret = basket.ClientSecret,
-                PaymentIntentId = basket.PaymentIntentId,
+                Coupon = basket.Coupon,
                 // The following is a collection expression. It is like writing without the [.. ] and ending with .ToList(); 
                 Items = [.. basket.Items.Select(x => new BasketItemDto
                 {
